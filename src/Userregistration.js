@@ -1,71 +1,60 @@
 import React, { useState } from "react";
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
-import validator from 'validator'
+
+import { Formik,Form,Field, validateYupSchema } from "formik";
+import * as yup from "yup";
+import KErrorMessage from "./KErrorMessage";
+import { Button } from "react-bootstrap";
 function Userregistration() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [cpassword, setCpassword] = useState('');
-  const [mobile, setMobile] = useState('');
-  const saveUser = () => {
-    console.log( email, password, mobile);
-  }
 
-  const [emailError, setEmailError] = useState('')
-  const validateEmail = (e) => {
-    var emailValue = e.target.value
-    if (validator.isEmail(emailValue)) {
-      setEmail(emailValue)
-      setEmailError('Valid Email :)')
-    } else {
-      setEmailError('Enter valid Email!')
-    }
-  }
+  const validateSchema  = yup.object({
+    name:yup.string().required("Name is required"),
+    mobile: yup.number()
+    .min(1000000000,"Not Valid")
+    .max(9999999999,"Not Valid ")
+    .required("Mobile number is require"),
+    email: yup.string().required(),
+    password : yup.string().matches(/^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/,"Password must contain at least 8 characters, one uppercase, one number and one special case character").required("Password is required"),
+    passwordConfirmation: yup.string()
+       .oneOf([yup.ref('password'), null], 'Passwords must match'),
+    gender: yup.string().required("Gender is required"),
+    dob: yup.string().required("Date of Birth required"),
 
-  const validatePhoneNumber = (number) => {
-    const isValidPhoneNumber = validator.isMobilePhone(number)
-    if (number.length == 10 && isValidPhoneNumber == true) {
-
-      setMobile('');
-    } else {
-      setMobile('Incorrect number');
-    }
-
-  }
-
-  const confirmP = (e) =>{
-    var cpassword = e.target.value;
-    if(cpassword != null  && password != null && password ==  cpassword ){
-      setCpassword('');
-    }else{
-      setCpassword('Wrong password');
-    }
-  } 
-  const [txt, setTxt] = useState('');
-  const onInputChange = (e) => {
-    if((e.charCode > 64 && e.charCode < 91) || (e.charCode > 96 && 
-      e.charCode < 123)){
-         console.log(1);
-    }else{
-      console.log(2);
-    }
-  } 
-
+  })
   return (
     <div className="App" style={{ margin: 'auto', marginLeft: '420px', }}>
       <div className="card" style={{ width: "50%" }}>
         <div className="card-body">
           <h2>User Registration</h2>
-          <input type="text" className="form-control" placeholder="Name" onChange={onInputChange} /><br /><br />
-          <input type="text" className="form-control" placeholder="Mobile" onChange={(e) => validatePhoneNumber(e.target.value)} /><br /><br />
-          <span style={{ fontWeight: 'bold', color: 'red', }}>{mobile}</span>
-          <input type="text" className="form-control" placeholder="Email" id="userEmail" onChange={(e) => validateEmail(e)} /><br /><br />
-          <span style={{ fontWeight: 'bold', color: 'red', }}>{emailError}</span>
-          <input type="text" className="form-control" placeholder="Password" onChange={(e) => setPassword(e.target.value)} /><br /><br />
-          <input type="text" className="form-control" placeholder="Confirm Password" onChange={(e) => confirmP(e)} /><br />
-          <span style={{ fontWeight: 'bold', color: 'red', }}>{cpassword}</span><br />
-          <Button onClick={saveUser} variant="primary">Save</Button>
+          <Formik validationSchema={validateSchema} initialValues={{name:"",mobile:"",email:"",password:"",passwordConfirmation:"",gender:"",dob:""}} onSubmit={(values)=>{ console.log(typeof(values))}}>
+              <Form>
+              
+              <Field name="name" className="form-control" placeholder="Name" type="text" /><br />
+              <KErrorMessage name="name" />
+              
+              <Field name="mobile" className="form-control" placeholder="Mobile" type="number" /><br />
+              <KErrorMessage name="mobile" />
+              
+              <Field name="email" className="form-control" placeholder="Email" type="text" /><br />
+              <KErrorMessage name="email" />
+              
+              <Field name="password" className="form-control" placeholder="Password" type="password" /><br />
+              <KErrorMessage name="password" />
+              
+              <Field name="passwordConfirmation" className="form-control" placeholder="Confirm Password" type="password" /><br />
+              <KErrorMessage name="passwordConfirmation" />
+              
+              <label>Male:</label> <Field name="gender" type="radio" value="male" /> {' '}
+              <label>Female:</label><Field name="gender" type="radio" value="female" /><br />
+              <KErrorMessage name="gender" />
+              
+              <Field name="dob" type="date" className="form-control" /><br />
+              <KErrorMessage name="dob" />
+              
+              <Button variant="primary" type="submit">Save</Button>
+              {/* <button >Submit</button> */}
+            </Form>
+          </Formik>
+          
         </div>
       </div>
     </div>
